@@ -13,7 +13,7 @@ def psg_setup():
         [sg.Button('Scan'), sg.Button('Cancel')]
     ]
     
-    window = sg.Window('File Deduplicator', layout)
+    window = sg.Window('File Deduplicator', layout, grab_anywhere=True)
     
     return window
 
@@ -25,7 +25,7 @@ def psg_scan_progress(file_num):
         [sg.ProgressBar(max_value=file_num, orientation='h', size=(20,20), key='-PBAR-')]
     ]
     
-    window = sg.Window('Scan Progress', layout)
+    window = sg.Window('Scan Progress', layout, grab_anywhere=True)
     
     return window
 
@@ -37,7 +37,7 @@ def psg_confirm(total_files):
         [sg.Button('Confirm')]
     ]
     
-    window = sg.Window('Duplicates Deleted', layout)
+    window = sg.Window('Duplicates Deleted', layout, grab_anywhere=True)
     
     return window
 
@@ -65,17 +65,22 @@ def main():
             break
         
         if event in ('Scan'):
+            # Gather the contents of our target folder
             file_lst = os.walk(values['selected_folder'])
+            
+            # Setup values for our progress bar
             scan_prog, total = 0, len(os.listdir(values['selected_folder']))
             
+            # Setup our progress bar window
             prog_window = psg_scan_progress(total)
             progress_bar = prog_window['-PBAR-']
 
             unique_files = {}
             dupe_files = []
             
-            for root, folders, files in file_lst:
-                prog_window.read(timeout=0)
+            # Loop over our target directory and resident files
+            for root, _, files in file_lst:
+                prog_window.read(timeout=0)  # Establish and update our progress bar
 
                 for file in files:
                     # Update progress bar for each file
@@ -95,7 +100,7 @@ def main():
                         print(f"{file_path} appears to be a duplicate.")    
                         send2trash(file_path)
             
-                prog_window.close()
+                prog_window.close()  # Close the progress bar window
             
             # Report how many files have been removed
             confirm_window = psg_confirm(len(dupe_files))
