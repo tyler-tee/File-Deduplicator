@@ -1,0 +1,39 @@
+name: Python Code Quality and Security Check
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.11'
+    - name: Install Dependencies
+      run: |
+        pip install bandit
+        pip install flake8
+        pip install requests
+    - name: Run Bandit
+      run: bandit -r . > bandit-report.txt || true
+    - name: Run Flake8
+      run: flake8 --max-line-length 120 . > flake8-report.txt || true
+
+    - name: Upload Reports as Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: reports
+        path: |
+          bandit-report.txt
+          flake8-report.txt
